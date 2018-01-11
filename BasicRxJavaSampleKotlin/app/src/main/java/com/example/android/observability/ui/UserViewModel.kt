@@ -46,7 +46,7 @@ class UserViewModel(private val dataSource: UserDao) : ViewModel() {
      */
     fun updateUserName(userName: String): Completable {
         return Completable.fromAction {
-            val user = User(USER_ID, userName)
+            val user = User(USER_ID, userName, IS_ACTIVE)
             dataSource.insertUser(user)
         }
     }
@@ -54,5 +54,6 @@ class UserViewModel(private val dataSource: UserDao) : ViewModel() {
     companion object {
         // using a hardcoded value for simplicity
         const val USER_ID = "1"
+        const val IS_ACTIVE = true
     }
 }

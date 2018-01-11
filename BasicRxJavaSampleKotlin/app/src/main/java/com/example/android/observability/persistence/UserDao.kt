@@ -22,6 +22,7 @@ import android.arch.persistence.room.OnConflictStrategy
 import android.arch.persistence.room.Query
 
 import io.reactivex.Flowable
+import io.reactivex.Single
 
 /**
  * Data Access Object for the users table.
@@ -50,4 +51,10 @@ interface UserDao {
      */
     @Query("DELETE FROM Users")
     fun deleteAllUsers()
+
+    /**
+     * Gets user active state.
+     */
+    @Query("SELECT isactive FROM Users WHERE userid = :id")
+    fun isUserActive(id: String): Single<Boolean>
 }

@@ -20,6 +20,7 @@ import android.arch.core.executor.testing.InstantTaskExecutorRule
 import android.arch.persistence.room.Room
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
+import io.reactivex.Single
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -71,14 +72,14 @@ class UserDaoTest {
         database.userDao().insertUser(USER)
 
         // When we are updating the name of the user
-        val updatedUser = User(USER.id, "new username")
+        val updatedUser = User(USER.id, "new username", false)
         database.userDao().insertUser(updatedUser)
 
         // When subscribing to the emissions of the user
         database.userDao().getUserById(USER.id)
                 .test()
                 // assertValue asserts that there was only one emission of the user
-                .assertValue { it.id == USER.id && it.userName == "new username" }
+                .assertValue { it.id == USER.id && it.userName == "new username" && !it.isActive}
     }
 
     @Test fun deleteAndGetUser() {
@@ -94,7 +95,33 @@ class UserDaoTest {
                 .assertNoValues()
     }
 
+    @Test fun getsUserIsActive() {
+        // Given that we have a user in the data source
+        database.userDao().insertUser(USER)
+
+        // When we ask if the user is active
+        val isActiveRequest: Single<Boolean> = database.userDao().isUserActive(USER.id)
+
+        // Then the database should response with true
+        isActiveRequest
+                .test()
+                .assertValue(true)
+    }
+
+    @Test fun getsUserIsNotActive() {
+        // Given that we have a user in the data source
+        database.userDao().insertUser(USER.copy(isActive = false))
+
+        // When we ask if the user is active
+        val isActiveRequest: Single<Boolean> = database.userDao().isUserActive(USER.id)
+
+        // Then the database should response with true
+        isActiveRequest
+                .test()
+                .assertValue(false)
+    }
+
     companion object {
-        private val USER = User("id", "username")
+        private val USER = User("id", "username", true)
     }
 }
